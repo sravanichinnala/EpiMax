@@ -105,6 +105,18 @@ function Tasks() {
       alert("Something work happend.Please, try again." + `Error: ${e}`);
     }
   };
+  const markCompleted = (id) => {
+    fetch("http://localhost:3001/mark-completed", {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ id: id }),
+    }).then((res) => {
+      setTaskManager((prev) => prev + 1);
+    });
+  };
   const taskToDiv = ({ id, title, description, duedate, status }) => {
     return (
       <div id="item" key={id}>
@@ -144,6 +156,7 @@ function Tasks() {
         </span>
         <div className="task-edit-delete-btns">
           <button
+            // disabled={status === "completed" ? true : false}
             onClick={() => {
               const itemDetails = tasksList.find((item) => item.id === id);
               console.log("id", id);
@@ -161,14 +174,30 @@ function Tasks() {
           </button>
         </div>
         <button
-          style={{
-            marginTop: "5px",
-            color: "white",
-            border: "none",
-            background: "#007cffdb",
-            padding: "4px",
-            borderRadius: "5px",
-            cursor: "pointer",
+          style={
+            status === "completed"
+              ? {
+                  marginTop: "5px",
+                  color: "black",
+                  background: "white",
+                  border: "none",
+                  padding: "4px",
+                  borderRadius: "5px",
+                  cursor: "not-allowed",
+                }
+              : {
+                  marginTop: "5px",
+                  color: "white",
+                  border: "none",
+                  background: "#007cffdb",
+                  padding: "4px",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }
+          }
+          disabled={status === "completed" ? true : false}
+          onClick={() => {
+            markCompleted(id);
           }}
         >
           Mark As Completed
@@ -441,7 +470,7 @@ function Tasks() {
               <div id="items">
                 {tasksList.length === 0 ? (
                   <div style={{ marginTop: "50px" }}>
-                    <img src={emptyToDo} />
+                    <img src={emptyToDo} alt="Your Todo list is empty." />
                   </div>
                 ) : (
                   tasksList.map((item) => {

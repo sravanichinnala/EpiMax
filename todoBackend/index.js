@@ -5,6 +5,7 @@ import sqlite3 from "sqlite3";
 import path from "path";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { request } from "http";
 
 const app = express();
 app.use(express.json());
@@ -103,10 +104,18 @@ app.delete("/delete-task", authentication, async (request, response) => {
 });
 
 app.put("/update-task", authentication, async (request, response) => {
-  const { id, title, description, duedate, status, username } = request.body;\
+  const { id, title, description, duedate, status, username } = request.body;
   const updateQuery = `UPDATE tasks SET title='${title}',description='${description}',duedate='${duedate}',status='${status}' where id='${id}'`;
   const update = await db.run(updateQuery);
   response.send("updated");
+});
+
+app.put("/mark-completed", authentication, async (request, response) => {
+  const { id } = request.body;
+  console.log(request.body);
+  const markQuery = `UPDATE tasks SET status='completed' where id=${id};`;
+  const update = await db.run(markQuery);
+  response.send("Mark as Completed");
 });
 
 const connectToDatabaseAndServer = async () => {

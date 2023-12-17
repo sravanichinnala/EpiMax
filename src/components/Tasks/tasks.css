@@ -106,10 +106,12 @@
   padding: 4px;
   border-radius: 5px;
   width: 50px;
+  cursor: pointer;
 }
 .task-edit-delete-btns {
   position: absolute;
   right: 5%;
+  box-shadow: 1px 2px 5px black;
 }
 .task-edit-delete-btns button {
   margin: 0px 5px;

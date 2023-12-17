@@ -1,0 +1,100 @@
+.login-signup {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  font-family: "Poppins", "Inter";
+  background-color: #f1ebeb;
+  height: 100vh;
+}
+.login-signup-main {
+  width: 500px;
+  /* background-color: #fff; */
+  border-radius: 10px;
+  padding: 2vw 0vw;
+}
+.login-signup-main,
+.login,
+.signup {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* align-items: center; */
+  /* margin: auto; */
+}
+.login,
+.signup {
+  border: 0.25px solid white;
+  border-radius: 5px;
+  background-color: #fff;
+}
+#login {
+  border: none;
+  padding: 2vw;
+}
+#signup {
+  border: none;
+  padding: 2vw;
+}
+.login-signup-btns {
+  display: flex;
+  justify-content: center;
+  /* padding: 10px; */
+  border: 1px solid gray;
+  border-radius: 50px;
+  margin-bottom: 10vh;
+  background-color: #fff;
+  position: absolute;
+  top: 20%;
+}
+.login-signup-btns button {
+  width: 250px;
+  border: none;
+  padding: 10px;
+  border-radius: 50px;
+  background: none;
+  color: black;
+  font-family: "Poppins", "Inter";
+
+  /* background: none; */
+  /* color: white; */
+  cursor: pointer;
+}
+#signup-btn,
+#login-btn {
+  background-color: #3577ff;
+  margin-top: 10px;
+  font-family: "Poppins", "Inter";
+  border: none !important;
+  color: #fff;
+}
+#signup input,
+#login input,
+#signup-btn,
+#login-btn {
+  padding: 10px;
+  border-radius: 2px;
+  border: 1px solid black;
+  /* margin: auto; */
+  margin-top: 5px;
+  width: 75%;
+  margin-left: 10px;
+  /* border: none; */
+}
+#signup input:focus,
+#login input:focus {
+  outline: none;
+}
+.signup-name-div {
+  display: flex;
+  justify-content: space-between;
+}
+.signup-name-div input {
+  width: 180px;
+}
+.selected {
+  background: black !important;
+  color: white !important;
+  font-weight: bolder;
+}

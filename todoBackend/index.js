@@ -34,10 +34,16 @@ const authentication = (request, response, next) => {
 app.get("/tasks", authentication, async (request, response) => {
   //Select query based on username
   const username = request.username;
-  const selectQuery = `SELECT * FROM tasks where username='${username}'`;
-  const tasksList = await db.all(selectQuery);
-  response.send(tasksList);
-  // console.log(tasksList);
+  if (username === "admin") {
+    const selectQuery = `SELECT * FROM tasks;`;
+    const tasksList = await db.all(selectQuery);
+    response.send(tasksList);
+  } else {
+    const selectQuery = `SELECT * FROM tasks where username='${username}'`;
+    const tasksList = await db.all(selectQuery);
+    response.send(tasksList);
+    // console.log(tasksList);
+  }
 });
 
 app.post("/signup", async (request, response) => {
@@ -97,7 +103,8 @@ app.delete("/delete-task", authentication, async (request, response) => {
   let { id } = request.body;
   let username = request.username;
   // console.log(typeof id);
-  let deleteQuery = `DELETE FROM tasks where id = ${id} and username = '${username}';`;
+  let deleteQuery = `DELETE FROM tasks where id = ${id};`;
+  // let deleteQuery = `DELETE FROM tasks where id = ${id} and username = '${username}';`;
   await db.run(deleteQuery);
   // console.log(delItems);
   response.send("item deleted");

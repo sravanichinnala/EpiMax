@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AuthTokenContext from "../../context/AuthTokenContext";
-import { FaDoorOpen, FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import { FaEdit, FaFilter, FaPlus, FaTrash } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import "./tasks.css";
 import emptyToDo from "../emptyTodo.jpg";
@@ -12,22 +12,32 @@ function Tasks() {
   const navigate = useNavigate();
   let [addTaskDisplay, setAddTaskDisplay] = useState(false);
   let [tasksList, setTasksList] = useState([]);
+  let [backUpTaskList, setBackUpTaskList] = useState([]);
   let [taskManager, setTaskManager] = useState(0);
+  let [filterValue, setFilterValue] = useState("all");
   let [addEditTaskToggle, setAddEditTaskToggle] = useState("add");
+  let [duedateSort, setDueDateSort] = useState("default");
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+  const day = String(currentDate.getDate()).padStart(2, "0");
+  const formattedDate = `${year}-${month}-${day}`;
+
   let [newTaskDetails, setNewTaskDetails] = useState({
     title: "",
     description: "",
-    duedate: "",
+    duedate: `${formattedDate}`,
     status: "pending",
   });
   let [editTaskDetails, setEditTaskDetails] = useState({
     title: "",
     description: "",
-    duedate: "",
+    duedate: `${formattedDate}`,
     status: "",
     username: "",
   });
-  const tasksRetrieveFunc = () => {
+
+  const tasksRetrieveFunc = async () => {
     try {
       fetch("http://localhost:3001/tasks", {
         method: "GET",
@@ -37,7 +47,8 @@ function Tasks() {
         },
       }).then(async (res) => {
         const data = await res.json();
-        setTasksList(data);
+        setBackUpTaskList(data);
+        updateTaskList(filterValue, data);
       });
     } catch (e) {
       console.log(e);
@@ -75,16 +86,40 @@ function Tasks() {
   //   }
   // }, []);
   const handleNewTaskDetails = (e) => {
-    setNewTaskDetails((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    if (e.target.name === "duedate") {
+      let duedate = new Date(e.target.value);
+      const year = duedate.getFullYear();
+      const month = String(duedate.getMonth() + 1).padStart(2, "0");
+      const day = String(duedate.getDate()).padStart(2, "0");
+      const formattedDate = `${year}-${month}-${day}`;
+      setNewTaskDetails((prev) => ({
+        ...prev,
+        [e.target.name]: `${formattedDate}`,
+      }));
+    } else {
+      setNewTaskDetails((prev) => ({
+        ...prev,
+        [e.target.name]: e.target.value,
+      }));
+    }
   };
   const handleEditTaskDetails = (e) => {
-    setEditTaskDetails((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    if (e.target.name === "duedate") {
+      let duedate = new Date(e.target.value);
+      const year = duedate.getFullYear();
+      const month = String(duedate.getMonth() + 1).padStart(2, "0");
+      const day = String(duedate.getDate()).padStart(2, "0");
+      const formattedDate = `${year}-${month}-${day}`;
+      setEditTaskDetails((prev) => ({
+        ...prev,
+        [e.target.name]: `${formattedDate}`,
+      }));
+    } else {
+      setEditTaskDetails((prev) => ({
+        ...prev,
+        [e.target.name]: e.target.value,
+      }));
+    }
   };
   const deleteTask = (id) => {
     try {
@@ -102,7 +137,7 @@ function Tasks() {
         setTaskManager((prev) => prev + 1);
       });
     } catch (e) {
-      alert("Something work happend.Please, try again." + `Error: ${e}`);
+      alert("Something work happend.Please, try again. Error: " + e);
     }
   };
   const markCompleted = (id) => {
@@ -156,20 +191,18 @@ function Tasks() {
         </span>
         <div className="task-edit-delete-btns">
           <button
+            className="task-edit-btn"
             // disabled={status === "completed" ? true : false}
             onClick={() => {
               const itemDetails = tasksList.find((item) => item.id === id);
-              console.log("id", id);
-              console.log(itemDetails);
               setAddTaskDisplay((prev) => !prev);
               setEditTaskDetails(itemDetails);
-              console.log(editTaskDetails);
               setAddEditTaskToggle("edit");
             }}
           >
             <FaEdit />
           </button>
-          <button onClick={() => deleteTask(id)}>
+          <button className="task-delete-btn" onClick={() => deleteTask(id)}>
             <FaTrash />
           </button>
         </div>
@@ -217,6 +250,12 @@ function Tasks() {
       setTaskManager((prev) => prev + 1);
     });
     setAddTaskDisplay((prev) => !prev);
+    setNewTaskDetails({
+      title: "",
+      description: "",
+      duedate: "",
+      status: "pending",
+    });
   };
   const logOut = () => {
     setAuthToken("");
@@ -233,6 +272,18 @@ function Tasks() {
       setTaskManager((prev) => prev + 1);
     });
     setAddTaskDisplay((prev) => !prev);
+  };
+  const updateTaskList = (tempFilterValue, data) => {
+    if (tempFilterValue === "all") {
+      setTasksList(data);
+    } else {
+      let filteredTasksData = data.filter((item) => {
+        if (item.status === tempFilterValue) {
+          return item;
+        }
+      });
+      setTasksList((prev) => filteredTasksData);
+    }
   };
   const addEditTaskFunc = (mode) => {
     return (
@@ -273,9 +324,10 @@ function Tasks() {
             }
           />
           <input
-            type="text"
+            type="date"
             name="duedate"
-            placeholder="DD/MM/YYYY"
+            // placeholder="DD/MM/YYYY"
+            min={formattedDate}
             value={
               mode === "add" ? newTaskDetails.duedate : editTaskDetails.duedate
             }
@@ -310,22 +362,20 @@ function Tasks() {
               className="task-btn"
               onClick={() => {
                 setAddTaskDisplay((prev) => !prev);
-                {
-                  mode === "add"
-                    ? setNewTaskDetails({
-                        title: "",
-                        description: "",
-                        duedate: "",
-                        status: "pending",
-                      })
-                    : setEditTaskDetails({
-                        title: "",
-                        description: "",
-                        duedate: "",
-                        status: "pending",
-                        username: "",
-                      });
-                }
+                mode === "add"
+                  ? setNewTaskDetails({
+                      title: "",
+                      description: "",
+                      duedate: `${formattedDate}`,
+                      status: "pending",
+                    })
+                  : setEditTaskDetails({
+                      title: "",
+                      description: "",
+                      duedate: `${formattedDate}`,
+                      status: "pending",
+                      username: "",
+                    });
               }}
             >
               Cancel
@@ -340,6 +390,29 @@ function Tasks() {
         </div>
       </div>
     );
+  };
+  const filterTasks = (e) => {
+    let tempFilterValue = e.target.value;
+    setFilterValue(tempFilterValue);
+    setDueDateSort("default");
+    updateTaskList(tempFilterValue, backUpTaskList);
+  };
+  const sortTasks = async (e) => {
+    setDueDateSort(e.target.value);
+    if (e.target.value === "default") {
+    } else if (e.target.value === "date-asc") {
+      const sortedTasks = tasksList.sort((a, b) => {
+        const dateA = new Date(a.duedate);
+        const dateB = new Date(b.duedate);
+        return dateA - dateB;
+      });
+    } else if (e.target.value === "date-desc") {
+      const sortedTasks = tasksList.sort((a, b) => {
+        const dateA = new Date(a.duedate);
+        const dateB = new Date(b.duedate);
+        return dateB - dateA;
+      });
+    }
   };
   return (
     <>
@@ -425,15 +498,7 @@ function Tasks() {
             <div id="taskOperations">
               <div id="addTaskBtn">
                 <button
-                  style={{
-                    marginTop: "5px",
-                    color: "white",
-                    border: "none",
-                    background: "#007cffdb",
-                    padding: "4px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
+                  className="task-operation-btns"
                   onClick={() => {
                     setAddEditTaskToggle("add");
                     setAddTaskDisplay((prev) => !prev);
@@ -441,27 +506,63 @@ function Tasks() {
                 >
                   <FaPlus style={{ color: "black" }} /> Add Task
                 </button>
-              </div>
-              <div style={{ fontSize: "1.25rem" }}>
-                Hello, <b>{username}</b>
-              </div>
-              <div id="logoutBtn">
-                <button
+                <span
                   style={{
-                    marginTop: "5px",
-                    color: "white",
-                    border: "none",
-                    background: "#007cffdb",
-                    padding: "4px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
+                    marginLeft: "10px",
+                    textDecoration: "underline",
+                    textDecorationThickness: "2px",
+                    color: "indigo",
+                    fontSize: "1.1rem",
                   }}
-                  onClick={logOut}
                 >
-                  Logout&nbsp; <FiLogOut style={{ color: "black" }} />
-                </button>
+                  <span>Filter By:</span>
+                  <select
+                    className="task-operation-btns"
+                    value={filterValue}
+                    onChange={filterTasks}
+                  >
+                    <option value={"all"}>All</option>
+                    <option value={"pending"}>Pending</option>
+                    <option value={"in progress"}>In Progress</option>
+                    <option value={"completed"}>Completed</option>
+                  </select>
+                </span>
+                <span
+                  style={{
+                    marginLeft: "10px",
+                    textDecoration: "underline",
+                    textDecorationThickness: "2px",
+                    color: "indigo",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  <span>Sort By:</span>
+                  <select
+                    className="task-operation-btns"
+                    value={duedateSort}
+                    onChange={sortTasks}
+                  >
+                    <option value={"default"}>Select</option>
+                    <option value={"date-asc"}>Asc Due Date</option>
+                    <option value={"date-desc"}>Desc Due Date</option>
+                  </select>
+                </span>
+              </div>
+              <div style={{ display: "flex" }}>
+                <div
+                  style={{
+                    fontSize: "1.25rem",
+                    marginRight: "5px",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Hello, <b>{username}</b>
+                </div>
+                <div id="logoutBtn">
+                  <button className="task-operation-btns" onClick={logOut}>
+                    Logout&nbsp; <FiLogOut style={{ color: "black" }} />
+                  </button>
+                </div>
               </div>
             </div>
             <hr />

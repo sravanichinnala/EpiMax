@@ -93,6 +93,7 @@ export function Login(props) {
           name="userName"
           value={userDetals.userName}
           onChange={inputHandler}
+          required
         />
         <input
           type="password"
@@ -100,6 +101,7 @@ export function Login(props) {
           placeholder="Password"
           value={userDetals.password}
           onChange={inputHandler}
+          required
         />
         <label
           style={{
@@ -145,30 +147,34 @@ export function Signup() {
   };
   const createUser = (e) => {
     e.preventDefault();
-    fetch("http://localhost:3001/signup", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(userDetails),
-    })
-      .then(async (response) => {
-        const data = await response.json();
-        if (response.status === 200) {
-          alert(data.message);
-        } else if (response.status === 301) {
-          alert(data.message);
-        }
+    if (userDetails.password !== userDetails.confirmPassword) {
+      alert("Password should match");
+    } else {
+      fetch("http://localhost:3001/signup", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(userDetails),
       })
-      .catch((error) => {
-        alert(error);
+        .then(async (response) => {
+          const data = await response.json();
+          if (response.status === 200) {
+            alert(data.message);
+          } else if (response.status === 301) {
+            alert(data.message);
+          }
+        })
+        .catch((error) => {
+          alert(error);
+        });
+      setUserDetails({
+        userName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
       });
-    setUserDetails({
-      userName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
+    }
   };
   return (
     <div className="signup">
@@ -184,6 +190,7 @@ export function Signup() {
           name="userName"
           value={userDetails.userName}
           onChange={inputHandle}
+          required
         />
         <input
           type="email"
@@ -191,6 +198,7 @@ export function Signup() {
           name="email"
           value={userDetails.email}
           onChange={inputHandle}
+          required
         />
         <input
           type="password"
@@ -198,6 +206,7 @@ export function Signup() {
           name="password"
           value={userDetails.password}
           onChange={inputHandle}
+          required
         />
         <input
           type="password"
@@ -205,6 +214,7 @@ export function Signup() {
           name="confirmPassword"
           value={userDetails.confirmPassword}
           onChange={inputHandle}
+          required
         />
         <button id="signup-btn" onClick={createUser}>
           Sign Up

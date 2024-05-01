@@ -54,6 +54,7 @@ function Tasks() {
       console.log(e);
     }
   };
+  
   useEffect(() => {
     if (authToken === "") {
       navigate("/login-signup");
